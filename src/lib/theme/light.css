@@ -1,0 +1,29 @@
+/* Mica Light - warm white, blue accent.
+ * Values sit on top of Windows 11 Mica (which is itself wallpaper-derived),
+ * so the alpha channel is deliberately low to let the OS effect show through. */
+
+:root,
+:root[data-theme='light'] {
+  --hd-bg: oklch(98.5% 0.005 90); /* ~ #FAFAF9 */
+  --hd-surface-1: color-mix(in oklch, white 70%, transparent);
+  --hd-surface-2: color-mix(in oklch, white 85%, transparent);
+
+  --hd-text-1: #0b0d12;
+  --hd-text-2: #454953;
+  --hd-text-3: #8a8f9c;
+
+  --hd-accent: #3b6fe0;
+  --hd-accent-fg: #ffffff;
+
+  --hd-border: rgba(0, 0, 0, 0.07);
+
+  --hd-shadow-sm: 0 1px 2px rgba(15, 17, 23, 0.06),
+    0 1px 1px rgba(15, 17, 23, 0.04);
+  --hd-shadow-md: 0 6px 16px rgba(15, 17, 23, 0.08),
+    0 2px 4px rgba(15, 17, 23, 0.05);
+  --hd-shadow-lg: 0 16px 40px rgba(15, 17, 23, 0.12),
+    0 4px 12px rgba(15, 17, 23, 0.06);
+
+  --hd-danger: #d54a3a;
+  --hd-success: #2f9e6a;
+}
