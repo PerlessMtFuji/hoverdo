@@ -4,11 +4,13 @@
 
 import * as api from '$lib/ipc/commands';
 import { on } from '$lib/ipc/events';
-import type { List, Task } from '$lib/ipc/types';
+import type { List, Reminder, Task } from '$lib/ipc/types';
 
 class ListsStore {
   lists = $state<List[]>([]);
   tasks = $state<Task[]>([]);
+  /** task_id -> active reminder (pending, not fired). */
+  reminders = $state<Record<string, Reminder>>({});
   selectedId = $state<string | null>(null);
   loading = $state(false);
   loadingTasks = $state(false);
@@ -16,6 +18,7 @@ class ListsStore {
   private subscribed = false;
   private suppressListsEvent = false;
   private suppressTasksEvent = false;
+  private suppressRemindersEvent = false;
 
   get selected(): List | null {
     if (!this.selectedId) return null;
@@ -39,6 +42,13 @@ class ListsStore {
           return;
         }
         if (listId === this.selectedId) void this.refreshTasks();
+      });
+      await on('reminders:changed', (listId) => {
+        if (this.suppressRemindersEvent) {
+          this.suppressRemindersEvent = false;
+          return;
+        }
+        if (listId === this.selectedId) void this.refreshReminders();
       });
     } catch (e) {
       this.subscribed = false;
@@ -68,15 +78,58 @@ class ListsStore {
   async refreshTasks(): Promise<void> {
     if (!this.selectedId) {
       this.tasks = [];
+      this.reminders = {};
       return;
     }
     this.loadingTasks = true;
     try {
       this.tasks = await api.listTasks(this.selectedId);
+      await this.refreshReminders();
     } catch (e) {
       this.error = errorMessage(e);
     } finally {
       this.loadingTasks = false;
+    }
+  }
+
+  async refreshReminders(): Promise<void> {
+    if (!this.selectedId) {
+      this.reminders = {};
+      return;
+    }
+    try {
+      const list = await api.listRemindersForList(this.selectedId);
+      const map: Record<string, Reminder> = {};
+      for (const r of list) map[r.target_id] = r;
+      this.reminders = map;
+    } catch (e) {
+      this.error = errorMessage(e);
+    }
+  }
+
+  async setReminderForTask(taskId: string, dueAt: Date): Promise<void> {
+    this.error = null;
+    try {
+      this.suppressRemindersEvent = true;
+      const r = await api.setTaskReminder(taskId, dueAt.toISOString());
+      this.reminders = { ...this.reminders, [taskId]: r };
+    } catch (e) {
+      this.error = errorMessage(e);
+    }
+  }
+
+  async clearReminderForTask(taskId: string): Promise<void> {
+    const existing = this.reminders[taskId];
+    if (!existing) return;
+    this.error = null;
+    try {
+      this.suppressRemindersEvent = true;
+      await api.cancelReminder(existing.id);
+      const next = { ...this.reminders };
+      delete next[taskId];
+      this.reminders = next;
+    } catch (e) {
+      this.error = errorMessage(e);
     }
   }
 

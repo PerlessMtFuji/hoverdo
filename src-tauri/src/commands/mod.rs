@@ -4,4 +4,5 @@
 
 pub mod lists;
 pub mod notes;
+pub mod reminders;
 pub mod widgets;

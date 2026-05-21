@@ -2,6 +2,7 @@
   import { Trash2, Plus, ClipboardList } from '@lucide/svelte';
   import { listsStore } from '$lib/stores/lists.svelte';
   import Button from './Button.svelte';
+  import ReminderControl from './ReminderControl.svelte';
 
   let titleDraft = $state('');
   let renamingTitle = $state('');
@@ -93,6 +94,7 @@
               >
                 {task.title}
               </span>
+              <ReminderControl taskId={task.id} reminder={listsStore.reminders[task.id]} />
               <button
                 type="button"
                 class="rounded-control p-1 text-text-3 opacity-0 transition-opacity hover:bg-danger/10 hover:text-danger group-hover:opacity-100"

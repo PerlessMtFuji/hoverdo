@@ -84,3 +84,45 @@ pub async fn mark_fired(db: &Db, id: &str) -> Result<()> {
     tx.commit().await?;
     Ok(())
 }
+
+/// Soft-cancel a pending reminder. Distinct from `mark_fired`: cancelled
+/// reminders never trigger a notification.
+pub async fn cancel(db: &Db, id: &str) -> Result<()> {
+    let now = OffsetDateTime::now_utc();
+    let hlc = db.clock.now().to_string();
+    let mut tx = db.pool.begin().await?;
+    let res = sqlx::query(
+        "UPDATE reminders SET deleted_at = ?1, updated_at = ?1, hlc_ts = ?2 \
+         WHERE id = ?3 AND deleted_at IS NULL",
+    )
+    .bind(now)
+    .bind(&hlc)
+    .bind(id)
+    .execute(&mut *tx)
+    .await?;
+    if res.rows_affected() == 0 {
+        return Err(HoverdoError::NotFound);
+    }
+    log_change(&mut tx, TABLE, id, "delete", None, &hlc).await?;
+    tx.commit().await?;
+    Ok(())
+}
+
+/// All pending (non-deleted, non-fired) reminders pointing at the tasks in
+/// the given list. Used by the to-do UI to show per-task chips in one
+/// round-trip.
+pub async fn list_for_list_tasks(pool: &SqlitePool, list_id: &str) -> Result<Vec<Reminder>> {
+    let rows = sqlx::query_as::<_, Reminder>(
+        "SELECT r.* FROM reminders r \
+         JOIN tasks t ON t.id = r.target_id AND r.target_type = 'task' \
+         WHERE t.list_id = ?1 \
+           AND t.deleted_at IS NULL \
+           AND r.deleted_at IS NULL \
+           AND r.fired_at IS NULL \
+         ORDER BY r.due_at ASC",
+    )
+    .bind(list_id)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}

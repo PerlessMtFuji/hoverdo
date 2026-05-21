@@ -67,3 +67,16 @@ export interface CreateTaskInput {
   title: string;
   due_at?: string | null;
 }
+
+export interface Reminder {
+  id: string;
+  target_type: string; // 'task' | 'note'
+  target_id: string;
+  due_at: string;
+  fired_at: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  hlc_ts: string;
+  origin_device_id: string;
+}

@@ -10,6 +10,7 @@ import type {
   NewNote,
   Note,
   NotePatch,
+  Reminder,
   Task
 } from './types';
 
@@ -79,4 +80,18 @@ export function setTaskDone(id: string, done: boolean): Promise<Task> {
 
 export function deleteTask(id: string): Promise<void> {
   return invoke('delete_task', { id });
+}
+
+// ---- reminders ----------------------------------------------------------
+
+export function setTaskReminder(taskId: string, dueAt: string): Promise<Reminder> {
+  return invoke('set_task_reminder', { taskId, dueAt });
+}
+
+export function cancelReminder(id: string): Promise<void> {
+  return invoke('cancel_reminder', { id });
+}
+
+export function listRemindersForList(listId: string): Promise<Reminder[]> {
+  return invoke('list_reminders_for_list', { listId });
 }

@@ -7,6 +7,7 @@ export type EventMap = {
   'notes:changed': string; // id of the affected note
   'lists:changed': string; // id of the affected list
   'tasks:changed': string; // list_id of the affected task's list
+  'reminders:changed': string; // list_id of the affected task's list
 };
 
 export function on<E extends keyof EventMap>(

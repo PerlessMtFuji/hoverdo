@@ -9,6 +9,7 @@ pub mod commands;
 pub mod db;
 pub mod error;
 pub mod models;
+pub mod reminders;
 pub mod sync;
 mod theme;
 mod tray;
@@ -79,6 +80,9 @@ pub fn run() {
                 }
             });
 
+            // Reminder scheduler runs for the lifetime of the app.
+            reminders::spawn(app.handle().clone());
+
             tracing::info!("Hoverdo started");
             Ok(())
         })
@@ -107,6 +111,9 @@ pub fn run() {
             commands::lists::list_tasks,
             commands::lists::set_task_done,
             commands::lists::delete_task,
+            commands::reminders::set_task_reminder,
+            commands::reminders::cancel_reminder,
+            commands::reminders::list_reminders_for_list,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
