@@ -8,6 +8,7 @@
   import NoteEditor from '$lib/components/NoteEditor.svelte';
   import ListPicker from '$lib/components/ListPicker.svelte';
   import TaskBoard from '$lib/components/TaskBoard.svelte';
+  import SearchBar from '$lib/components/SearchBar.svelte';
   import { Sun, Moon } from '@lucide/svelte';
 
   $effect(() => {
@@ -31,9 +32,11 @@
 
 <div class="flex h-full flex-col">
   <header
-    class="drag-region flex h-10 shrink-0 items-center justify-between border-b border-border-subtle px-4 text-text-2"
+    class="drag-region flex h-10 shrink-0 items-center gap-3 border-b border-border-subtle px-4 text-text-2"
   >
     <span class="text-sm font-medium tracking-tight text-text-1">Hoverdo</span>
+    <div class="flex-1"></div>
+    <SearchBar />
     <button
       type="button"
       class="rounded-control p-1 text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1"

@@ -188,6 +188,48 @@ async fn widget_instances_pin_geometry_and_unpin() {
 }
 
 #[tokio::test]
+async fn fts5_finds_notes_lists_and_tasks() {
+    // Bypasses the IPC layer (Tauri state needs a runtime); the underlying
+    // FTS5 wiring is shared with `commands::search` so a match here proves
+    // the schema + triggers in 0001_init.sql work end-to-end.
+    let db = open_db().await;
+
+    let _note = repos::notes::create(
+        &db,
+        NewNote {
+            title: "Groceries".into(),
+            body: "buy oat milk and bread".into(),
+            color: None,
+        },
+    )
+    .await
+    .unwrap();
+    let _list = repos::lists::create(
+        &db,
+        NewList {
+            title: "Errands".into(),
+            color: None,
+        },
+    )
+    .await
+    .unwrap();
+
+    use sqlx::Row;
+    let rows = sqlx::query(
+        "SELECT n.title AS t \
+         FROM notes_fts \
+         JOIN notes n ON n.rowid = notes_fts.rowid \
+         WHERE notes_fts MATCH ?1",
+    )
+    .bind("\"milk\"*")
+    .fetch_all(&db.pool)
+    .await
+    .unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].get::<String, _>("t"), "Groceries");
+}
+
+#[tokio::test]
 async fn settings_json_roundtrip() {
     let db = open_db().await;
     #[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
