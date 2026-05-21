@@ -11,6 +11,7 @@ pub mod error;
 pub mod models;
 pub mod sync;
 mod theme;
+mod tray;
 pub mod widgets;
 
 use std::sync::Arc;
@@ -45,6 +46,13 @@ pub fn run() {
             if let Some(window) = app.get_webview_window("main") {
                 theme::apply_window_effects(&window);
             }
+
+            // Tray + hide-to-tray. Tray failures are non-fatal: on systems
+            // without a tray (some Linux WMs) we just keep running without it.
+            if let Err(e) = tray::install(app.handle()) {
+                tracing::warn!(error = %e, "tray icon unavailable");
+            }
+            tray::install_main_close_to_tray(app.handle());
 
             // Open the on-disk database under the OS-standard app data dir.
             // `block_on` is acceptable here because setup runs once on the
