@@ -87,6 +87,15 @@ pub fn run() {
             commands::widgets::get_widget,
             commands::widgets::list_widgets,
             commands::widgets::save_widget_geometry,
+            commands::lists::create_list,
+            commands::lists::list_lists,
+            commands::lists::get_list,
+            commands::lists::rename_list,
+            commands::lists::delete_list,
+            commands::lists::create_task,
+            commands::lists::list_tasks,
+            commands::lists::set_task_done,
+            commands::lists::delete_task,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -31,3 +31,39 @@ export interface Health {
   device_id: string;
   active_widgets: number;
 }
+
+export interface List {
+  id: string;
+  title: string;
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  hlc_ts: string;
+  origin_device_id: string;
+}
+
+export interface NewList {
+  title: string;
+  color?: string | null;
+}
+
+export interface Task {
+  id: string;
+  list_id: string;
+  title: string;
+  done: boolean;
+  due_at: string | null;
+  sort_key: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  hlc_ts: string;
+  origin_device_id: string;
+}
+
+export interface CreateTaskInput {
+  list_id: string;
+  title: string;
+  due_at?: string | null;
+}

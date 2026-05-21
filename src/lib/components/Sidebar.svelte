@@ -1,9 +1,6 @@
 <script lang="ts">
   import { StickyNote, ListChecks, Tag } from '@lucide/svelte';
-
-  // Static nav placeholder until lists / tags ship in their own commits.
-  // The "Notes" item is selected; the others are inert and just hint at
-  // what's coming next.
+  import { navStore } from '$lib/stores/nav.svelte';
 </script>
 
 <aside
@@ -15,7 +12,10 @@
 
   <button
     type="button"
-    class="flex items-center gap-2 rounded-control bg-surface-2 px-2 py-1.5 text-left text-text-1"
+    class="flex items-center gap-2 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
+    class:bg-surface-2={navStore.section === 'notes'}
+    class:text-text-1={navStore.section === 'notes'}
+    onclick={() => navStore.set('notes')}
   >
     <StickyNote size={14} />
     Notes
@@ -23,9 +23,10 @@
 
   <button
     type="button"
-    disabled
-    title="Coming next"
-    class="flex items-center gap-2 rounded-control px-2 py-1.5 text-left opacity-50"
+    class="flex items-center gap-2 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
+    class:bg-surface-2={navStore.section === 'lists'}
+    class:text-text-1={navStore.section === 'lists'}
+    onclick={() => navStore.set('lists')}
   >
     <ListChecks size={14} />
     To-do lists

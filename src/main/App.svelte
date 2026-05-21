@@ -1,22 +1,28 @@
 <script lang="ts">
   import { theme, toggleTheme } from '$lib/theme/theme.svelte';
   import { notesStore } from '$lib/stores/notes.svelte';
+  import { listsStore } from '$lib/stores/lists.svelte';
+  import { navStore } from '$lib/stores/nav.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import NoteList from '$lib/components/NoteList.svelte';
   import NoteEditor from '$lib/components/NoteEditor.svelte';
+  import ListPicker from '$lib/components/ListPicker.svelte';
+  import TaskBoard from '$lib/components/TaskBoard.svelte';
   import { Sun, Moon } from '@lucide/svelte';
 
-  // Initial load + cross-window subscription.
   $effect(() => {
     void notesStore.refresh();
     void notesStore.ensureSubscribed();
+    void listsStore.refresh();
+    void listsStore.ensureSubscribed();
   });
 
-  // Ctrl+N → new note (matches the plan's keyboard-shortcut promise).
+  // Ctrl/Cmd+N → new item in the active section.
   function handleKey(e: KeyboardEvent) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
-      void notesStore.create();
+      if (navStore.section === 'notes') void notesStore.create();
+      else void listsStore.create();
     }
   }
 </script>
@@ -45,7 +51,12 @@
 
   <main class="flex flex-1 overflow-hidden">
     <Sidebar />
-    <NoteList />
-    <NoteEditor />
+    {#if navStore.section === 'notes'}
+      <NoteList />
+      <NoteEditor />
+    {:else}
+      <ListPicker />
+      <TaskBoard />
+    {/if}
   </main>
 </div>

@@ -2,5 +2,6 @@
 //! deserialize input, call the repo, return the result. Domain rules live
 //! in the repo layer, not here. Commands are registered in `lib.rs`.
 
+pub mod lists;
 pub mod notes;
 pub mod widgets;
