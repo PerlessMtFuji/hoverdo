@@ -5,6 +5,7 @@
 //! unit-tested without the desktop runtime.
 
 pub mod clock;
+pub mod commands;
 pub mod db;
 pub mod error;
 pub mod models;
@@ -60,7 +61,15 @@ pub fn run() {
             tracing::info!("Hoverdo started");
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ping, health])
+        .invoke_handler(tauri::generate_handler![
+            ping,
+            health,
+            commands::notes::create_note,
+            commands::notes::list_notes,
+            commands::notes::get_note,
+            commands::notes::update_note,
+            commands::notes::delete_note,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
