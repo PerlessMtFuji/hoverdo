@@ -35,6 +35,29 @@ pub async fn pin_note(
     widgets::pin_note_as_sticky(&app, &note_id).await
 }
 
+#[tauri::command]
+pub async fn pin_list(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    list_id: String,
+) -> Result<WidgetInstance, HoverdoError> {
+    let existing = repos::widget_instances::list_active(&state.db.pool).await?;
+    if let Some(instance) = existing
+        .into_iter()
+        .find(|w| w.kind == "todo" && w.target_id == list_id)
+    {
+        let label = widgets::label_for(&instance.kind, &instance.id);
+        if let Some(win) = app.get_webview_window(&label) {
+            let _ = win.set_focus();
+        } else {
+            widgets::spawn_window(&app, &instance)?;
+        }
+        return Ok(instance);
+    }
+
+    widgets::pin_list_as_todo(&app, &list_id).await
+}
+
 /// Hide & remove the widget. Closing the window also unpins via the
 /// Destroyed handler in `widgets.rs`; this command is for explicit
 /// "unpin from main window" actions where the window may not exist.

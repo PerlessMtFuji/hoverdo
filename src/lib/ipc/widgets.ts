@@ -27,6 +27,10 @@ export function pinNote(noteId: string): Promise<WidgetInstance> {
   return invoke('pin_note', { noteId });
 }
 
+export function pinList(listId: string): Promise<WidgetInstance> {
+  return invoke('pin_list', { listId });
+}
+
 export function unpinWidget(widgetId: string): Promise<void> {
   return invoke('unpin_widget', { widgetId });
 }

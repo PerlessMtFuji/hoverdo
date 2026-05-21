@@ -98,3 +98,12 @@ pub async fn pin_note_as_sticky(app: &AppHandle, note_id: &str) -> Result<Widget
     spawn_window(app, &instance)?;
     Ok(instance)
 }
+
+/// Convenience for the `pin_list` command path.
+pub async fn pin_list_as_todo(app: &AppHandle, list_id: &str) -> Result<WidgetInstance> {
+    let state = app.state::<AppState>();
+    let instance =
+        repos::widget_instances::pin(&state.db, WidgetKind::Todo, list_id).await?;
+    spawn_window(app, &instance)?;
+    Ok(instance)
+}

@@ -83,6 +83,7 @@ pub fn run() {
             commands::notes::update_note,
             commands::notes::delete_note,
             commands::widgets::pin_note,
+            commands::widgets::pin_list,
             commands::widgets::unpin_widget,
             commands::widgets::get_widget,
             commands::widgets::list_widgets,

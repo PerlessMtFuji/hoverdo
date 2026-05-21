@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Plus, ListChecks } from '@lucide/svelte';
+  import { Plus, ListChecks, Pin } from '@lucide/svelte';
   import { listsStore } from '$lib/stores/lists.svelte';
+  import * as widgetsApi from '$lib/ipc/widgets';
   import Button from './Button.svelte';
 
   function relativeTime(iso: string): string {
@@ -10,6 +11,15 @@
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86_400) return `${Math.floor(diff / 3600)}h`;
     return `${Math.floor(diff / 86_400)}d`;
+  }
+
+  async function pin(listId: string, e: MouseEvent) {
+    e.stopPropagation();
+    try {
+      await widgetsApi.pinList(listId);
+    } catch (err) {
+      console.warn('pin list failed', err);
+    }
   }
 </script>
 
@@ -41,19 +51,32 @@
     {:else}
       {#each listsStore.lists as list (list.id)}
         <li>
-          <button
-            type="button"
-            class="flex w-full items-baseline justify-between gap-2 rounded-control px-3 py-2 text-left transition-colors hover:bg-surface-2"
+          <div
+            class="group relative rounded-control transition-colors hover:bg-surface-2"
             class:bg-surface-2={listsStore.selectedId === list.id}
-            onclick={() => listsStore.select(list.id)}
           >
-            <span class="truncate text-sm font-medium text-text-1">
-              {list.title.trim() || 'Untitled list'}
-            </span>
-            <span class="shrink-0 text-[11px] text-text-3">
-              {relativeTime(list.updated_at)}
-            </span>
-          </button>
+            <button
+              type="button"
+              class="flex w-full items-baseline justify-between gap-2 rounded-control px-3 py-2 pr-9 text-left"
+              onclick={() => listsStore.select(list.id)}
+            >
+              <span class="truncate text-sm font-medium text-text-1">
+                {list.title.trim() || 'Untitled list'}
+              </span>
+              <span class="shrink-0 text-[11px] text-text-3">
+                {relativeTime(list.updated_at)}
+              </span>
+            </button>
+            <button
+              type="button"
+              class="absolute right-1.5 top-1.5 rounded-control p-1 text-text-3 opacity-0 transition-opacity hover:bg-surface-1 hover:text-accent group-hover:opacity-100"
+              aria-label="Pin as floating widget"
+              title="Pin as floating widget"
+              onclick={(e) => pin(list.id, e)}
+            >
+              <Pin size={13} />
+            </button>
+          </div>
         </li>
       {/each}
     {/if}
