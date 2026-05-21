@@ -197,29 +197,23 @@
   }
 </script>
 
-<!-- Glass card body. Top accent strip is the kind signature; we keep the
-     full window borderless so the rounded card shape shows through. -->
-<div
-  class="glass-card-strong flex h-full flex-col overflow-hidden"
-  style="opacity: {opacity};"
->
-  <!-- Accent ribbon -->
+<!-- Frosted panel: neutral semi-transparent backdrop, no accent tint in the
+     body. The kind identity comes only from the thin ribbon + the add-button
+     gradient — not from a heavy colored surface. -->
+<div class="frosted-panel todo-widget flex h-full flex-col overflow-hidden" style="opacity: {opacity};">
+
+  <!-- Thin violet→indigo ribbon: the only place we use the kind accent. -->
   <span
     aria-hidden="true"
-    class="h-1.5 w-full shrink-0"
-    style="background: linear-gradient(90deg, #8c6bff 0%, #6b8cff 100%);"
+    class="h-1 w-full shrink-0"
+    style="background: linear-gradient(90deg, #9d7bff 0%, #7ba0ff 100%);"
   ></span>
 
+  <!-- Drag strip + title + close. Kept minimal so chrome disappears and the
+       content is the focus. -->
   <header
-    class="drag-region flex h-10 shrink-0 items-center gap-1.5 px-3 text-xs text-text-3"
+    class="drag-region flex h-9 shrink-0 items-center gap-1.5 px-3"
   >
-    <span
-      aria-hidden="true"
-      class="grid h-5 w-5 place-items-center rounded-pill text-text-on-brand shadow-hd-sm"
-      style="background: linear-gradient(135deg, #8c6bff 0%, #6b8cff 100%);"
-    >
-      <Check size={11} />
-    </span>
     <input
       type="text"
       data-no-drag
@@ -227,17 +221,20 @@
       oninput={scheduleTitleSave}
       onblur={flushTitleSave}
       placeholder="Untitled list"
-      class="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-text-1 placeholder:text-text-3 focus:outline-none"
+      class="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-text-1 placeholder:text-text-3"
     />
     {#if remainingCount() > 0}
-      <span class="shrink-0 rounded-pill bg-surface-2 px-1.5 py-0.5 text-[10px] tabular-nums text-text-2">
+      <span
+        class="shrink-0 rounded-pill px-1.5 py-0.5 text-[10px] tabular-nums"
+        style="background: rgba(157,123,255,0.18); color: #9d7bff;"
+      >
         {remainingCount()}
       </span>
     {/if}
     <button
       type="button"
       data-no-drag
-      class="grid h-6 w-6 place-items-center rounded-control text-text-3 transition-colors hover:bg-danger/10 hover:text-danger"
+      class="grid h-6 w-6 shrink-0 place-items-center rounded-control text-text-3 transition-colors hover:bg-danger/10 hover:text-danger"
       aria-label="Unpin and close"
       onclick={handleClose}
     >
@@ -246,7 +243,7 @@
   </header>
 
   {#if ready}
-    <ul class="flex-1 overflow-y-auto px-2 py-1">
+    <ul class="flex-1 overflow-y-auto px-1.5 py-1">
       {#if tasks.length === 0}
         <li class="px-2 py-6 text-center text-xs text-text-3">
           Nothing yet — add your first task below.
@@ -254,19 +251,25 @@
       {:else}
         {#each tasks as task (task.id)}
           <li
-            class="group flex items-center gap-2 rounded-control px-2 py-1.5 text-sm transition-colors hover:bg-surface-2"
+            class="group flex items-center gap-2 rounded-control px-2 py-1.5 text-sm transition-colors hover:bg-border-subtle"
           >
-            <input
-              type="checkbox"
-              checked={task.done}
-              onchange={(e) =>
-                toggle(task.id, (e.currentTarget as HTMLInputElement).checked)}
-              class="size-4 cursor-pointer accent-accent"
-            />
+            <!-- Custom checkbox: circle that fills with the accent gradient on check. -->
+            <button
+              type="button"
+              class="todo-check grid h-4 w-4 shrink-0 place-items-center rounded-pill transition-all"
+              class:todo-check--done={task.done}
+              aria-checked={task.done}
+              role="checkbox"
+              onclick={() => toggle(task.id, !task.done)}
+            >
+              {#if task.done}
+                <Check size={10} />
+              {/if}
+            </button>
             <span
-              class="flex-1 truncate"
+              class="flex-1 truncate text-[13px]"
               class:line-through={task.done}
-              class:text-text-3={task.done}
+              class:opacity-40={task.done}
               class:text-text-1={!task.done}
             >
               {task.title}
@@ -277,34 +280,36 @@
               aria-label="Delete task"
               onclick={() => remove(task.id)}
             >
-              <X size={11} />
+              <X size={10} />
             </button>
           </li>
         {/each}
       {/if}
     </ul>
 
+    <!-- Add task bar: transparent input to match the frosted body, gradient
+         submit pill so the CTA is clear without being loud. -->
     <form
       onsubmit={add}
-      class="flex shrink-0 items-center gap-1 border-t border-border-subtle bg-surface-sunken px-2 py-2"
+      class="flex shrink-0 items-center gap-1.5 border-t border-border-subtle px-2 py-1.5"
     >
       <input
         type="text"
         bind:value={draft}
         placeholder="Add task…"
-        class="flex-1 rounded-control border border-border-subtle bg-surface-1 px-2 py-1 text-sm text-text-1 placeholder:text-text-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent/40"
+        class="flex-1 border-0 bg-transparent text-[13px] text-text-1 placeholder:text-text-3"
       />
       <button
         type="submit"
-        class="grid h-7 w-7 place-items-center rounded-control text-text-on-brand transition-transform hover:scale-105"
-        style="background: linear-gradient(135deg, #8c6bff 0%, #6b8cff 100%);"
+        class="grid h-6 w-6 place-items-center rounded-pill text-white transition-transform hover:scale-105 disabled:opacity-40"
+        style="background: linear-gradient(135deg, #9d7bff 0%, #7ba0ff 100%);"
         aria-label="Add task"
         disabled={!draft.trim()}
       >
-        <Plus size={14} />
+        <Plus size={13} />
       </button>
     </form>
-    <div class="px-2 pb-2">
+    <div class="px-1.5 pb-1.5">
       <WidgetSettings
         {opacity}
         {alwaysOnTop}
@@ -316,3 +321,30 @@
     <div class="m-auto text-xs text-text-3">Loading…</div>
   {/if}
 </div>
+
+<style>
+  /* Custom round checkbox: unchecked = hollow circle outline;
+     checked = gradient-filled circle with a white tick. */
+  .todo-check {
+    border: 1.5px solid rgba(157, 123, 255, 0.45);
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    transition: border-color 150ms, background 150ms, color 150ms;
+  }
+  .todo-check:hover {
+    border-color: rgba(157, 123, 255, 0.75);
+  }
+  .todo-check--done {
+    background: linear-gradient(135deg, #9d7bff 0%, #7ba0ff 100%);
+    border-color: transparent;
+    color: #ffffff;
+  }
+
+  /* Ensure the frosted-panel fills the full window and clips children to
+     its border-radius, so the accent ribbon and other children are also
+     rounded at the top. */
+  .todo-widget {
+    overflow: hidden;
+  }
+</style>

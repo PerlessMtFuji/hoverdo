@@ -70,6 +70,13 @@ body {
   background-attachment: fixed;
 }
 
+/* Widget windows have transparent #app so the OS shows through rounded
+   corners of the widget card. The card itself provides its own background. */
+html[data-window='sticky'] #app,
+html[data-window='todo'] #app {
+  background: transparent;
+}
+
 /* Drag region used for borderless windows */
 .drag-region {
   -webkit-app-region: drag;
@@ -91,11 +98,19 @@ textarea,
   user-select: text;
 }
 
-/* Focus ring - keyboard only */
-:focus-visible {
+/* Focus ring - keyboard navigation only.
+   Scoped to interactive controls; excluded from text inputs/textareas where
+   a visible ring is distracting and the cursor already signals focus. */
+:focus-visible:not(input):not(textarea):not(select):not([contenteditable]) {
   outline: 2px solid var(--hd-accent);
   outline-offset: 2px;
   border-radius: 6px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable='true']:focus-visible {
+  outline: none;
 }
 
 /* ── Reusable surface presets ─────────────────────────────────────────── */
@@ -118,6 +133,18 @@ textarea,
   -webkit-backdrop-filter: blur(36px) saturate(160%);
   border: 1px solid var(--hd-border-strong);
   border-radius: var(--hd-radius-card);
+  box-shadow: var(--hd-shadow-lg);
+}
+
+/* Frosted-panel: used for todo widget. Neutral semi-transparent background
+   that doesn't inherit the theme's accent tint - shows the OS/wallpaper
+   backdrop through the frosted blur rather than a heavy colored surface. */
+.frosted-panel {
+  background: var(--hd-frosted-bg);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  border: 1px solid var(--hd-border);
+  border-radius: var(--hd-radius-widget);
   box-shadow: var(--hd-shadow-lg);
 }
 

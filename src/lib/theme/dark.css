@@ -49,6 +49,10 @@
   --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 35%, transparent),
     0 16px 44px color-mix(in srgb, var(--hd-accent) 28%, transparent);
 
+  /* Frosted panel: near-black neutral, not purple-tinted, so the todo widget
+     doesn't look like a glob of the accent hue. */
+  --hd-frosted-bg: rgba(18, 17, 26, 0.90);
+
   --hd-danger: #ff6a59;
   --hd-success: #4fcb8f;
   --hd-warning: #ffb960;
@@ -102,6 +106,7 @@
     --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 35%, transparent),
       0 16px 44px color-mix(in srgb, var(--hd-accent) 28%, transparent);
 
+    --hd-frosted-bg: rgba(18, 17, 26, 0.90);
     --hd-danger: #ff6a59;
     --hd-success: #4fcb8f;
     --hd-warning: #ffb960;

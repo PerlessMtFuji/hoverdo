@@ -55,6 +55,10 @@
   --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 22%, transparent),
     0 12px 36px color-mix(in srgb, var(--hd-accent) 22%, transparent);
 
+  /* Frosted panel background used by the todo widget.
+     Neutral warm-white so the widget doesn't pick up the accent hue. */
+  --hd-frosted-bg: rgba(252, 250, 247, 0.88);
+
   --hd-danger: #d54a3a;
   --hd-success: #2f9e6a;
   --hd-warning: #cc8a1f;
