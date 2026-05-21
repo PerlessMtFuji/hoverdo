@@ -4,10 +4,24 @@
 //! exposes IPC commands. Domain logic lives in dedicated modules so it can be
 //! unit-tested without the desktop runtime.
 
+pub mod clock;
+pub mod db;
+pub mod error;
+pub mod models;
+pub mod sync;
 mod theme;
+
+use std::sync::Arc;
 
 use tauri::Manager;
 use tracing_subscriber::EnvFilter;
+
+use crate::db::Db;
+
+/// Shared application state - one DB handle owned by all commands.
+pub struct AppState {
+    pub db: Arc<Db>,
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -29,16 +43,48 @@ pub fn run() {
             if let Some(window) = app.get_webview_window("main") {
                 theme::apply_window_effects(&window);
             }
+
+            // Open the on-disk database under the OS-standard app data dir.
+            // `block_on` is acceptable here because setup runs once on the
+            // main thread before any window starts driving.
+            let app_data_dir = app
+                .path()
+                .app_data_dir()
+                .expect("resolve app_data_dir");
+            let db_path = app_data_dir.join("hoverdo.db");
+            let db = tauri::async_runtime::block_on(Db::open(&db_path))
+                .expect("open hoverdo database");
+            tracing::info!(path = ?db_path, device_id = %db.device_id, "database ready");
+
+            app.manage(AppState { db: Arc::new(db) });
             tracing::info!("Hoverdo started");
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ping])
+        .invoke_handler(tauri::generate_handler![ping, health])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-/// Smoke-test IPC command; will be replaced by real domain commands in commit 2.
 #[tauri::command]
 fn ping() -> &'static str {
     "pong"
+}
+
+/// Diagnostic command exposing DB connectivity + device id - lets the
+/// frontend confirm the backend is fully booted before doing real work.
+#[tauri::command]
+async fn health(state: tauri::State<'_, AppState>) -> Result<Health, error::HoverdoError> {
+    let active_widgets = db::repos::widget_instances::list_active(&state.db.pool)
+        .await?
+        .len();
+    Ok(Health {
+        device_id: state.db.device_id_str(),
+        active_widgets,
+    })
+}
+
+#[derive(serde::Serialize)]
+pub struct Health {
+    pub device_id: String,
+    pub active_widgets: usize,
 }
