@@ -4,6 +4,7 @@
   // result hops to the right section and selects the underlying item.
 
   import { Search, FileText, ListChecks, ClipboardCheck } from '@lucide/svelte';
+  import { fly } from 'svelte/transition';
   import { search as fts, type SearchHit } from '$lib/ipc/search';
   import { notesStore } from '$lib/stores/notes.svelte';
   import { listsStore } from '$lib/stores/lists.svelte';
@@ -120,6 +121,7 @@
 
   {#if open && (hits.length > 0 || query.trim().length > 0)}
     <div
+      transition:fly={{ y: -4, duration: 140 }}
       class="absolute right-0 top-full z-30 mt-1 max-h-96 w-80 overflow-y-auto rounded-control border border-border-subtle bg-surface-1/95 p-1 shadow-hd-lg backdrop-blur"
     >
       {#if hits.length === 0}

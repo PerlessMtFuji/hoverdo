@@ -4,13 +4,22 @@
   // existing reminder is a chip; clicking it cancels.
 
   import { Bell, BellOff, BellRing } from '@lucide/svelte';
+  import { fly } from 'svelte/transition';
   import { listsStore } from '$lib/stores/lists.svelte';
+  import { clickOutside } from '$lib/actions/click-outside';
   import type { Reminder } from '$lib/ipc/types';
 
   type Props = { taskId: string; reminder: Reminder | undefined };
   let { taskId, reminder }: Props = $props();
 
   let open = $state(false);
+
+  function handleKey(e: KeyboardEvent) {
+    if (open && e.key === 'Escape') {
+      e.stopPropagation();
+      open = false;
+    }
+  }
   // Pre-fill the picker with "in 1 hour" so quick custom edits are fast.
   let customValue = $state(defaultCustom());
 
@@ -86,8 +95,12 @@
 
   {#if open}
     <div
+      transition:fly={{ y: -4, duration: 140 }}
+      use:clickOutside={() => (open = false)}
+      onkeydown={handleKey}
       class="absolute right-0 top-full z-20 mt-1 w-56 rounded-control border border-border-subtle bg-surface-1/95 p-2 shadow-hd-lg backdrop-blur"
       role="dialog"
+      tabindex="-1"
     >
       <p class="px-1 pb-1 text-[10px] uppercase tracking-wider text-text-3">
         Remind me
