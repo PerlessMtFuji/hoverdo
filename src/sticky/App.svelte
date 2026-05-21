@@ -8,6 +8,7 @@
   import { on } from '$lib/ipc/events';
   import type { Note } from '$lib/ipc/types';
   import type { WidgetInstance } from '$lib/ipc/widgets';
+  import WidgetSettings from '$lib/components/WidgetSettings.svelte';
 
   // Widgets receive their target via URL: sticky.html?widget_id=<uuid>
   const widgetId =
@@ -18,11 +19,15 @@
   let draftBody = $state('');
   let saving = $state(false);
   let ready = $state(false);
+  let opacity = $state(1);
+  let alwaysOnTop = $state(false);
 
   const BODY_DEBOUNCE_MS = 500;
   const GEOM_DEBOUNCE_MS = 400;
+  const OPACITY_DEBOUNCE_MS = 200;
   let bodyTimer: number | null = null;
   let geomTimer: number | null = null;
+  let opacityTimer: number | null = null;
 
   let unsubs: Array<() => void> = [];
   const win = getCurrentWindow();
@@ -43,7 +48,29 @@
       return;
     }
     draftBody = note.body;
+    opacity = widget.opacity ?? 1;
+    alwaysOnTop = widget.always_on_top ?? false;
+    // Native always-on-top is applied at spawn time; nothing to do here.
     ready = true;
+  }
+
+  function applyOpacity(value: number) {
+    opacity = value;
+    if (!widget) return;
+    if (opacityTimer !== null) window.clearTimeout(opacityTimer);
+    opacityTimer = window.setTimeout(() => {
+      void widgetsApi.setWidgetOpacity(widget!.id, value);
+    }, OPACITY_DEBOUNCE_MS);
+  }
+
+  async function applyAlwaysOnTop(value: boolean) {
+    alwaysOnTop = value;
+    if (!widget) return;
+    try {
+      await widgetsApi.setWidgetAlwaysOnTop(widget.id, value);
+    } catch (e) {
+      console.warn('set always-on-top failed', e);
+    }
   }
 
   function scheduleBodySave() {
@@ -131,6 +158,7 @@
     void flushBodySave();
     if (bodyTimer !== null) window.clearTimeout(bodyTimer);
     if (geomTimer !== null) window.clearTimeout(geomTimer);
+    if (opacityTimer !== null) window.clearTimeout(opacityTimer);
     for (const u of unsubs) u();
   });
 
@@ -140,7 +168,7 @@
   }
 </script>
 
-<div class="flex h-full flex-col">
+<div class="flex h-full flex-col" style="opacity: {opacity};">
   <header
     class="drag-region flex h-7 shrink-0 items-center gap-1.5 border-b border-border-subtle px-2 text-xs text-text-3"
   >
@@ -168,6 +196,12 @@
       placeholder="Write a quick thought…"
       class="flex-1 resize-none border-0 bg-transparent p-3 text-sm leading-relaxed text-text-1 placeholder:text-text-3 focus:outline-none"
     ></textarea>
+    <WidgetSettings
+      {opacity}
+      {alwaysOnTop}
+      onOpacityChange={applyOpacity}
+      onAlwaysOnTopChange={applyAlwaysOnTop}
+    />
   {:else}
     <div class="m-auto text-xs text-text-3">Loading…</div>
   {/if}

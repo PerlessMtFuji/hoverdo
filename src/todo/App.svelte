@@ -8,6 +8,7 @@
   import { on } from '$lib/ipc/events';
   import type { List, Task } from '$lib/ipc/types';
   import type { WidgetInstance } from '$lib/ipc/widgets';
+  import WidgetSettings from '$lib/components/WidgetSettings.svelte';
 
   const widgetId =
     new URLSearchParams(window.location.search).get('widget_id') ?? '';
@@ -17,9 +18,13 @@
   let tasks = $state<Task[]>([]);
   let draft = $state('');
   let ready = $state(false);
+  let opacity = $state(1);
+  let alwaysOnTop = $state(false);
 
   const GEOM_DEBOUNCE_MS = 400;
+  const OPACITY_DEBOUNCE_MS = 200;
   let geomTimer: number | null = null;
+  let opacityTimer: number | null = null;
 
   let unsubs: Array<() => void> = [];
   const win = getCurrentWindow();
@@ -39,7 +44,28 @@
       return;
     }
     tasks = await api.listTasks(widget.target_id);
+    opacity = widget.opacity ?? 1;
+    alwaysOnTop = widget.always_on_top ?? false;
     ready = true;
+  }
+
+  function applyOpacity(value: number) {
+    opacity = value;
+    if (!widget) return;
+    if (opacityTimer !== null) window.clearTimeout(opacityTimer);
+    opacityTimer = window.setTimeout(() => {
+      void widgetsApi.setWidgetOpacity(widget!.id, value);
+    }, OPACITY_DEBOUNCE_MS);
+  }
+
+  async function applyAlwaysOnTop(value: boolean) {
+    alwaysOnTop = value;
+    if (!widget) return;
+    try {
+      await widgetsApi.setWidgetAlwaysOnTop(widget.id, value);
+    } catch (e) {
+      console.warn('set always-on-top failed', e);
+    }
   }
 
   async function add(e: SubmitEvent) {
@@ -127,6 +153,7 @@
 
   onDestroy(() => {
     if (geomTimer !== null) window.clearTimeout(geomTimer);
+    if (opacityTimer !== null) window.clearTimeout(opacityTimer);
     for (const u of unsubs) u();
   });
 
@@ -136,7 +163,7 @@
   }
 </script>
 
-<div class="flex h-full flex-col">
+<div class="flex h-full flex-col" style="opacity: {opacity};">
   <header
     class="drag-region flex h-7 shrink-0 items-center gap-1.5 border-b border-border-subtle px-2 text-xs text-text-3"
   >
@@ -209,6 +236,12 @@
         <Plus size={14} />
       </button>
     </form>
+    <WidgetSettings
+      {opacity}
+      {alwaysOnTop}
+      onOpacityChange={applyOpacity}
+      onAlwaysOnTopChange={applyAlwaysOnTop}
+    />
   {:else}
     <div class="m-auto text-xs text-text-3">Loading…</div>
   {/if}

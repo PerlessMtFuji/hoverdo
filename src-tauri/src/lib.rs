@@ -88,6 +88,8 @@ pub fn run() {
             commands::widgets::get_widget,
             commands::widgets::list_widgets,
             commands::widgets::save_widget_geometry,
+            commands::widgets::set_widget_opacity,
+            commands::widgets::set_widget_always_on_top,
             commands::lists::create_list,
             commands::lists::list_lists,
             commands::lists::get_list,

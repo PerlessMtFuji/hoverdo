@@ -52,3 +52,14 @@ export function saveWidgetGeometry(
 ): Promise<void> {
   return invoke('save_widget_geometry', { widgetId, x, y, w, h });
 }
+
+export function setWidgetOpacity(widgetId: string, opacity: number): Promise<void> {
+  return invoke('set_widget_opacity', { widgetId, opacity });
+}
+
+export function setWidgetAlwaysOnTop(
+  widgetId: string,
+  onTop: boolean
+): Promise<void> {
+  return invoke('set_widget_always_on_top', { widgetId, onTop });
+}

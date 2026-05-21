@@ -108,3 +108,33 @@ pub async fn save_widget_geometry(
 ) -> Result<(), HoverdoError> {
     repos::widget_instances::update_geometry(&state.db, &widget_id, x, y, w, h).await
 }
+
+/// Persist the opacity preference. Visual opacity is applied frontend-side
+/// (CSS), so this is purely persistence so it survives restarts.
+#[tauri::command]
+pub async fn set_widget_opacity(
+    state: State<'_, AppState>,
+    widget_id: String,
+    opacity: f64,
+) -> Result<(), HoverdoError> {
+    repos::widget_instances::set_opacity(&state.db, &widget_id, opacity).await
+}
+
+/// Persist + apply always-on-top. We also flip the native window state so
+/// the change is immediate; the DB value is what we restore on next start.
+#[tauri::command]
+pub async fn set_widget_always_on_top(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    widget_id: String,
+    on_top: bool,
+) -> Result<(), HoverdoError> {
+    repos::widget_instances::set_always_on_top(&state.db, &widget_id, on_top).await?;
+    if let Some(instance) = repos::widget_instances::get(&state.db.pool, &widget_id).await? {
+        let label = widgets::label_for(&instance.kind, &instance.id);
+        if let Some(win) = app.get_webview_window(&label) {
+            let _ = win.set_always_on_top(on_top);
+        }
+    }
+    Ok(())
+}
