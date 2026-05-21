@@ -72,10 +72,12 @@ pub async fn unpin_widget(
     };
     let label = widgets::label_for(&instance.kind, &instance.id);
     if let Some(win) = app.get_webview_window(&label) {
-        // Closing dispatches Destroyed → soft-delete; we don't double-delete.
+        // Closing dispatches Destroyed → soft-delete + widgets:changed event
+        // in the handler; we don't double-emit.
         let _ = win.close();
     } else {
         repos::widget_instances::unpin(&state.db, &widget_id).await?;
+        widgets::emit_changed(&app);
     }
     Ok(())
 }

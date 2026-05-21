@@ -74,6 +74,7 @@ pub async fn delete_list(
 pub struct CreateTaskInput {
     pub list_id: String,
     pub title: String,
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub due_at: Option<OffsetDateTime>,
 }
 

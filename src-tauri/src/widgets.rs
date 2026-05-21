@@ -4,15 +4,26 @@
 //! whose label is `<kind>-<instance_id>`. This module owns spawn + restore +
 //! cleanup; the IPC commands in `commands/widgets.rs` are thin wrappers.
 
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 use crate::db::repos;
 use crate::error::{HoverdoError, Result};
 use crate::models::{WidgetInstance, WidgetKind};
 use crate::AppState;
 
+pub const EVENT_WIDGETS_CHANGED: &str = "widgets:changed";
+
 pub fn label_for(kind: &str, instance_id: &str) -> String {
     format!("{kind}-{instance_id}")
+}
+
+/// Notify listeners (Home Hub, future widget-list surfaces) that the set of
+/// active widget instances changed. Best-effort: a missing listener isn't a
+/// failure mode worth bubbling up.
+pub fn emit_changed(app: &AppHandle) {
+    if let Err(e) = app.emit(EVENT_WIDGETS_CHANGED, ()) {
+        tracing::warn!(error = %e, "failed to emit widgets:changed");
+    }
 }
 
 /// Spawn a Tauri window for the given widget instance. Idempotent: if a
@@ -61,6 +72,7 @@ pub fn spawn_window(app: &AppHandle, instance: &WidgetInstance) -> Result<()> {
                 if let Err(e) = repos::widget_instances::unpin(&state.db, &id).await {
                     tracing::warn!(error = %e, widget = %id, "failed to soft-delete widget");
                 }
+                emit_changed(&app);
             });
         }
     });
@@ -96,6 +108,7 @@ pub async fn pin_note_as_sticky(app: &AppHandle, note_id: &str) -> Result<Widget
     let instance =
         repos::widget_instances::pin(&state.db, WidgetKind::Sticky, note_id).await?;
     spawn_window(app, &instance)?;
+    emit_changed(app);
     Ok(instance)
 }
 
@@ -105,5 +118,6 @@ pub async fn pin_list_as_todo(app: &AppHandle, list_id: &str) -> Result<WidgetIn
     let instance =
         repos::widget_instances::pin(&state.db, WidgetKind::Todo, list_id).await?;
     spawn_window(app, &instance)?;
+    emit_changed(app);
     Ok(instance)
 }

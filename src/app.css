@@ -1,50 +1,62 @@
 /* Tailwind 4 - inline config via @theme */
 @import 'tailwindcss';
 
-/* Theme tokens - all components bind to these via Tailwind's color-* / etc.
-   Light/dark values are switched by toggling data-theme on <html>. */
 @import './lib/theme/tokens.css';
 @import './lib/theme/light.css';
 @import './lib/theme/dark.css';
 
-/* Hoverdo Tailwind theme binding - exposes our CSS vars under Tailwind utilities.
-   Usage: bg-surface-1, text-text-1, border-border-subtle, etc. */
+/* Tailwind theme binding. Components reference these via bg-surface-1,
+   text-text-1, border-border-subtle, shadow-hd-md, etc. */
 @theme {
   --color-bg: var(--hd-bg);
   --color-surface-1: var(--hd-surface-1);
   --color-surface-2: var(--hd-surface-2);
+  --color-surface-strong: var(--hd-surface-strong);
+  --color-surface-sunken: var(--hd-surface-sunken);
   --color-text-1: var(--hd-text-1);
   --color-text-2: var(--hd-text-2);
   --color-text-3: var(--hd-text-3);
   --color-accent: var(--hd-accent);
+  --color-accent-strong: var(--hd-accent-strong);
   --color-accent-fg: var(--hd-accent-fg);
+  --color-accent-soft: var(--hd-accent-soft);
   --color-border-subtle: var(--hd-border);
+  --color-border-strong: var(--hd-border-strong);
   --color-danger: var(--hd-danger);
   --color-success: var(--hd-success);
+  --color-warning: var(--hd-warning);
 
   --radius-widget: var(--hd-radius-widget);
+  --radius-card: var(--hd-radius-card);
   --radius-control: var(--hd-radius-control);
+  --radius-pill: var(--hd-radius-pill);
 
+  --shadow-hd-xs: var(--hd-shadow-xs);
   --shadow-hd-sm: var(--hd-shadow-sm);
   --shadow-hd-md: var(--hd-shadow-md);
   --shadow-hd-lg: var(--hd-shadow-lg);
+  --shadow-hd-glow: var(--hd-shadow-glow);
 
   --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont,
     'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Inter Variable', 'Inter', -apple-system, system-ui,
+    sans-serif;
 }
 
-/* Base resets specific to Hoverdo - Tauri windows are borderless/transparent */
+/* Tauri windows are borderless/transparent. The body fills the chrome with
+   our app-level radial gradient so even when Mica isn't available (Linux
+   dev, fallback render) the window still has a designed background. */
 html,
 body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: var(--font-sans);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   color: var(--hd-text-1);
-  background: transparent; /* Mica/Acrylic is applied at OS level */
+  background: transparent;
   user-select: none;
   overscroll-behavior: none;
 }
@@ -54,21 +66,25 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
+  background: var(--hd-bg-app);
+  background-attachment: fixed;
 }
 
-/* Drag region used for borderless windows - elements with this class become the title bar */
+/* Drag region used for borderless windows */
 .drag-region {
   -webkit-app-region: drag;
   app-region: drag;
 }
 .drag-region button,
 .drag-region input,
+.drag-region select,
+.drag-region textarea,
 .drag-region [data-no-drag] {
   -webkit-app-region: no-drag;
   app-region: no-drag;
 }
 
-/* Inputs should re-enable selection */
+/* Inputs re-enable selection */
 input,
 textarea,
 [contenteditable='true'] {
@@ -79,18 +95,71 @@ textarea,
 :focus-visible {
   outline: 2px solid var(--hd-accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/* Widget body: rounded, soft shadow, very subtle scrim above Mica for legibility */
-.widget-body {
-  border-radius: var(--hd-radius-widget);
-  overflow: hidden;
-  background: color-mix(in srgb, var(--hd-bg) 60%, transparent);
+/* ── Reusable surface presets ─────────────────────────────────────────── */
+
+/* Glass card: blurred translucent surface, hairline border, subtle elevation.
+   The blur is what sells "glass" when Mica is off; on top of Mica it stacks
+   to a thicker, frosted look. */
+.glass-card {
+  background: var(--hd-surface-1);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid var(--hd-border);
+  border-radius: var(--hd-radius-card);
   box-shadow: var(--hd-shadow-md);
 }
 
-/* Subtle scrollbar - applies in WebView2 */
+.glass-card-strong {
+  background: var(--hd-surface-2);
+  backdrop-filter: blur(36px) saturate(160%);
+  -webkit-backdrop-filter: blur(36px) saturate(160%);
+  border: 1px solid var(--hd-border-strong);
+  border-radius: var(--hd-radius-card);
+  box-shadow: var(--hd-shadow-lg);
+}
+
+/* Brand gradient text - used for the wordmark and section headlines. */
+.gradient-text {
+  background: var(--hd-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradient border ring on hover-able tiles. Implemented as a stacked
+   background: outer gradient + inner solid, with a 1px gap created by
+   `padding-box`/`border-box`. */
+.gradient-ring {
+  background:
+    linear-gradient(var(--hd-surface-1), var(--hd-surface-1)) padding-box,
+    var(--hd-gradient-brand) border-box;
+  border: 1px solid transparent;
+}
+
+/* Sticky paper - default body of a sticky note widget. Subtle vertical
+   gradient + soft inner highlight + crisp drop shadow on the corner.
+   The page color comes from --hd-paper-current, set per-note. */
+.paper {
+  --hd-paper-current: var(--hd-paper-butter);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--hd-paper-current) 100%, white 8%) 0%,
+      var(--hd-paper-current) 100%
+    );
+  color: #1a1428;
+  border-radius: var(--hd-radius-widget);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+    0 18px 40px rgba(42, 31, 58, 0.18),
+    0 4px 10px rgba(42, 31, 58, 0.08);
+}
+
+/* Subtle scrollbar (WebView2 / WebKit) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -105,3 +174,15 @@ textarea,
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Tiny animation utility used by widget tiles and pulses. */
+@keyframes hd-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes hd-pulse-soft {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+.anim-float { animation: hd-float 6s ease-in-out infinite; }
+.anim-pulse-soft { animation: hd-pulse-soft 2.4s ease-in-out infinite; }

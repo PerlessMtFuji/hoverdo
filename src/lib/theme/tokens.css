@@ -1,30 +1,66 @@
 /* Hoverdo theme token contract.
  *
- * All values here are placeholders / defaults; concrete values live in
- * light.css and dark.css. Components MUST consume tokens via var(--hd-*)
- * (or the Tailwind aliases in app.css) and never hard-code colors.
- *
- * Naming:
- *   --hd-bg          window background (under Mica, generally semi-transparent)
- *   --hd-surface-1   primary card / panel
- *   --hd-surface-2   hover / elevated surface
- *   --hd-text-1/2/3  primary / secondary / tertiary text
- *   --hd-accent      brand accent (focus, CTA)
- *   --hd-accent-fg   foreground used on top of accent fills
- *   --hd-border      hairline 1px @ low alpha
- *   --hd-shadow-*    elevation set
- *   --hd-radius-*    border radii
- *   --hd-danger      destructive
- *   --hd-success     positive
+ * All values here are constants (radii, motion, gradient stops, brand hues).
+ * Per-scheme colors live in light.css / dark.css and are switched via
+ * data-theme on <html>. Components MUST consume tokens via var(--hd-*) (or
+ * the Tailwind aliases in app.css) and never hard-code colors.
  */
 
 :root {
-  --hd-radius-widget: 12px;
-  --hd-radius-control: 8px;
+  /* Geometry */
+  --hd-radius-widget: 16px;
+  --hd-radius-card: 14px;
+  --hd-radius-control: 10px;
+  --hd-radius-pill: 999px;
 
   /* Motion */
   --hd-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --hd-ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);
   --hd-duration-fast: 120ms;
   --hd-duration-base: 220ms;
   --hd-duration-slow: 320ms;
+
+  /* Brand hue anchors - reused by both schemes so gradient identities stay
+     consistent. Schemes override exact tints / alpha. */
+  --hd-brand-coral: #ff7a6b;
+  --hd-brand-rose: #ff6aa3;
+  --hd-brand-violet: #a06bff;
+  --hd-brand-indigo: #6b8cff;
+  --hd-brand-aqua: #57c4d9;
+  --hd-brand-amber: #ffb968;
+
+  /* Signature gradient - used on CTA, brand mark, hero tiles. */
+  --hd-gradient-brand: linear-gradient(
+    135deg,
+    var(--hd-brand-coral) 0%,
+    var(--hd-brand-rose) 40%,
+    var(--hd-brand-violet) 100%
+  );
+  --hd-gradient-brand-soft: linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--hd-brand-coral) 22%, transparent) 0%,
+    color-mix(in oklch, var(--hd-brand-rose) 22%, transparent) 50%,
+    color-mix(in oklch, var(--hd-brand-violet) 22%, transparent) 100%
+  );
+  --hd-gradient-night: linear-gradient(
+    135deg,
+    #1d1532 0%,
+    #2a1740 45%,
+    #3a1f4a 100%
+  );
+  --hd-gradient-dawn: linear-gradient(
+    135deg,
+    #fff3e6 0%,
+    #ffe0e9 45%,
+    #ecdcff 100%
+  );
+
+  /* Sticky paper palette - default per-note color swatches. */
+  --hd-paper-butter: #fff4c2;
+  --hd-paper-peach: #ffd9c2;
+  --hd-paper-rose: #ffcfdc;
+  --hd-paper-lilac: #e0d3ff;
+  --hd-paper-mint: #c9efd9;
+  --hd-paper-sky: #c9e2ff;
+  --hd-paper-sand: #f1e3c8;
 }

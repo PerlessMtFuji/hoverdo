@@ -34,7 +34,8 @@
   }
 
   function relative(iso: string): string {
-    const t = new Date(iso).getTime();
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return '';
     const diff = (t - Date.now()) / 1000;
     if (diff < 0) return 'now';
     if (diff < 60) return `${Math.round(diff)}s`;

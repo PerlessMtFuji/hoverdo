@@ -1,6 +1,7 @@
 //! Reminders IPC. MVP scope: tasks only - notes can join in a future commit
 //! once the editor has room for a "remind me" affordance.
 
+use serde::Deserialize;
 use tauri::{AppHandle, Emitter, State};
 use time::OffsetDateTime;
 
@@ -8,6 +9,16 @@ use crate::db::repos;
 use crate::error::HoverdoError;
 use crate::models::{Reminder, ReminderTarget};
 use crate::AppState;
+
+/// Wrapper so the `due_at` parameter is deserialized as an RFC3339 string
+/// (what the frontend sends via `Date.toISOString()`) rather than `time`'s
+/// default array form.
+#[derive(Debug, Deserialize)]
+pub struct SetReminderInput {
+    pub task_id: String,
+    #[serde(with = "time::serde::rfc3339")]
+    pub due_at: OffsetDateTime,
+}
 
 const EVENT_REMINDERS_CHANGED: &str = "reminders:changed";
 
@@ -24,9 +35,9 @@ fn emit(app: &AppHandle, payload: &str) {
 pub async fn set_task_reminder(
     app: AppHandle,
     state: State<'_, AppState>,
-    task_id: String,
-    due_at: OffsetDateTime,
+    input: SetReminderInput,
 ) -> Result<Reminder, HoverdoError> {
+    let SetReminderInput { task_id, due_at } = input;
     let task = repos::tasks::get(&state.db.pool, &task_id)
         .await?
         .ok_or(HoverdoError::NotFound)?;

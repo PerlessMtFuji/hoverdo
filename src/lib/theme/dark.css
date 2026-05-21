@@ -1,47 +1,109 @@
-/* Mica Dark - deep slate, light blue accent. */
+/* Dark - deep violet "midnight glass" scheme.
+ *
+ * Background is a near-black with violet undertone (#161024) sitting under
+ * Mica. Surfaces lean warm-white-with-alpha so cards still feel like glass
+ * panes lit from behind, not flat charcoal. */
 
 :root[data-theme='dark'] {
-  --hd-bg: oklch(17% 0.012 260); /* ~ #0F1117 */
-  --hd-surface-1: color-mix(in oklch, #1a1d27 70%, transparent);
-  --hd-surface-2: color-mix(in oklch, #232735 85%, transparent);
+  --hd-bg: #161024;
+  --hd-bg-app: radial-gradient(
+      120% 70% at 0% 0%,
+      color-mix(in srgb, var(--hd-brand-violet) 28%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 60% at 100% 100%,
+      color-mix(in srgb, var(--hd-brand-rose) 22%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      80% 80% at 50% 100%,
+      color-mix(in srgb, var(--hd-brand-indigo) 20%, transparent) 0%,
+      transparent 65%
+    ),
+    #14101f;
 
-  --hd-text-1: #e7e9ee;
-  --hd-text-2: #a0a7b5;
-  --hd-text-3: #6b7280;
+  --hd-surface-1: color-mix(in srgb, #2a223e 60%, transparent);
+  --hd-surface-2: color-mix(in srgb, #36284f 75%, transparent);
+  --hd-surface-strong: #1f1830;
+  --hd-surface-sunken: color-mix(in srgb, #06030f 35%, transparent);
 
-  --hd-accent: #7aa2ff;
-  --hd-accent-fg: #0b0d12;
+  --hd-text-1: #f1ecff;
+  --hd-text-2: #b9b0d2;
+  --hd-text-3: #7a728c;
+  --hd-text-on-brand: #ffffff;
 
-  --hd-border: rgba(255, 255, 255, 0.09);
+  --hd-accent: #c79bff;
+  --hd-accent-strong: #b079ff;
+  --hd-accent-fg: #18102b;
+  --hd-accent-soft: color-mix(in srgb, var(--hd-accent) 22%, transparent);
 
-  --hd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
-  --hd-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45),
-    0 2px 4px rgba(0, 0, 0, 0.3);
-  --hd-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.35);
+  --hd-border: color-mix(in srgb, #ffffff 9%, transparent);
+  --hd-border-strong: color-mix(in srgb, #ffffff 16%, transparent);
+
+  --hd-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --hd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.35);
+  --hd-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.55), 0 3px 8px rgba(0, 0, 0, 0.4);
+  --hd-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.65),
+    0 8px 20px rgba(0, 0, 0, 0.45);
+  --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 35%, transparent),
+    0 16px 44px color-mix(in srgb, var(--hd-accent) 28%, transparent);
 
   --hd-danger: #ff6a59;
   --hd-success: #4fcb8f;
+  --hd-warning: #ffb960;
 }
 
-/* Auto-follow OS if no explicit theme is set */
+/* Auto-follow OS when no explicit theme is set. Mirrors :root[data-theme='dark']. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --hd-bg: oklch(17% 0.012 260);
-    --hd-surface-1: color-mix(in oklch, #1a1d27 70%, transparent);
-    --hd-surface-2: color-mix(in oklch, #232735 85%, transparent);
-    --hd-text-1: #e7e9ee;
-    --hd-text-2: #a0a7b5;
-    --hd-text-3: #6b7280;
-    --hd-accent: #7aa2ff;
-    --hd-accent-fg: #0b0d12;
-    --hd-border: rgba(255, 255, 255, 0.09);
-    --hd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
-    --hd-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45),
-      0 2px 4px rgba(0, 0, 0, 0.3);
-    --hd-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5),
-      0 4px 12px rgba(0, 0, 0, 0.35);
+    --hd-bg: #161024;
+    --hd-bg-app: radial-gradient(
+        120% 70% at 0% 0%,
+        color-mix(in srgb, var(--hd-brand-violet) 28%, transparent) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        90% 60% at 100% 100%,
+        color-mix(in srgb, var(--hd-brand-rose) 22%, transparent) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        80% 80% at 50% 100%,
+        color-mix(in srgb, var(--hd-brand-indigo) 20%, transparent) 0%,
+        transparent 65%
+      ),
+      #14101f;
+
+    --hd-surface-1: color-mix(in srgb, #2a223e 60%, transparent);
+    --hd-surface-2: color-mix(in srgb, #36284f 75%, transparent);
+    --hd-surface-strong: #1f1830;
+    --hd-surface-sunken: color-mix(in srgb, #06030f 35%, transparent);
+
+    --hd-text-1: #f1ecff;
+    --hd-text-2: #b9b0d2;
+    --hd-text-3: #7a728c;
+
+    --hd-accent: #c79bff;
+    --hd-accent-strong: #b079ff;
+    --hd-accent-fg: #18102b;
+    --hd-accent-soft: color-mix(in srgb, var(--hd-accent) 22%, transparent);
+
+    --hd-border: color-mix(in srgb, #ffffff 9%, transparent);
+    --hd-border-strong: color-mix(in srgb, #ffffff 16%, transparent);
+
+    --hd-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.45);
+    --hd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5),
+      0 1px 1px rgba(0, 0, 0, 0.35);
+    --hd-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.55),
+      0 3px 8px rgba(0, 0, 0, 0.4);
+    --hd-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.65),
+      0 8px 20px rgba(0, 0, 0, 0.45);
+    --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 35%, transparent),
+      0 16px 44px color-mix(in srgb, var(--hd-accent) 28%, transparent);
+
     --hd-danger: #ff6a59;
     --hd-success: #4fcb8f;
+    --hd-warning: #ffb960;
   }
 }

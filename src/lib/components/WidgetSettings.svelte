@@ -1,6 +1,10 @@
 <script lang="ts">
   // Shared settings strip used by sticky & todo widgets.
-  // Lives outside the drag region so its controls are interactive.
+  //
+  // The `tone` prop controls whether the strip styles itself against the
+  // paper backdrop of a sticky note (semi-transparent black) or against the
+  // glassy backdrop of a todo widget (theme tokens). This keeps the API
+  // surface tiny while still letting each widget feel native to its body.
 
   import { Pin, PinOff } from '@lucide/svelte';
 
@@ -9,25 +13,20 @@
     alwaysOnTop: boolean;
     onOpacityChange: (value: number) => void;
     onAlwaysOnTopChange: (value: boolean) => void;
+    tone?: 'paper' | 'glass';
   };
 
   let {
     opacity,
     alwaysOnTop,
     onOpacityChange,
-    onAlwaysOnTopChange
+    onAlwaysOnTopChange,
+    tone = 'glass'
   }: Props = $props();
 
-  // Debounce frontend → backend persistence so dragging the slider doesn't
-  // hammer the DB. Visual opacity (parent) updates instantly.
-  let persistTimer: number | null = null;
   function onSliderInput(e: Event) {
     const value = Number((e.currentTarget as HTMLInputElement).value);
     onOpacityChange(value);
-    if (persistTimer !== null) window.clearTimeout(persistTimer);
-    persistTimer = window.setTimeout(() => {
-      onOpacityChange(value); // re-emit; the parent debounces persistence
-    }, 200);
   }
 
   function pct(v: number): string {
@@ -36,9 +35,10 @@
 </script>
 
 <div
-  class="flex shrink-0 items-center gap-2 border-t border-border-subtle px-2 py-1 text-[11px] text-text-3"
+  class="hd-settings flex shrink-0 items-center gap-2 rounded-control px-2 py-1.5 text-[11px]"
+  data-tone={tone}
 >
-  <span class="shrink-0">Opacity</span>
+  <span class="hd-settings-label shrink-0">Opacity</span>
   <input
     type="range"
     min="0.2"
@@ -49,14 +49,13 @@
     class="hd-range flex-1"
     aria-label="Widget opacity"
   />
-  <span class="w-9 shrink-0 text-right tabular-nums text-text-2">
+  <span class="hd-settings-value w-9 shrink-0 text-right tabular-nums">
     {pct(opacity)}
   </span>
   <button
     type="button"
-    class="rounded-control p-1 transition-colors hover:bg-surface-2"
-    class:text-accent={alwaysOnTop}
-    class:text-text-2={!alwaysOnTop}
+    class="hd-settings-pin rounded-control p-1 transition-colors"
+    class:is-on={alwaysOnTop}
     aria-pressed={alwaysOnTop}
     aria-label={alwaysOnTop ? 'Disable always-on-top' : 'Enable always-on-top'}
     title={alwaysOnTop ? 'Always on top: on' : 'Always on top: off'}
@@ -71,10 +70,52 @@
 </div>
 
 <style>
+  /* ── Tone: glass (todo widget, default) ───────────────────────────── */
+  .hd-settings[data-tone='glass'] {
+    background: var(--hd-surface-sunken);
+    color: var(--hd-text-3);
+  }
+  .hd-settings[data-tone='glass'] .hd-settings-label { color: var(--hd-text-3); }
+  .hd-settings[data-tone='glass'] .hd-settings-value { color: var(--hd-text-2); }
+  .hd-settings[data-tone='glass'] .hd-range {
+    background: var(--hd-border);
+  }
+  .hd-settings[data-tone='glass'] .hd-range::-webkit-slider-thumb {
+    background: var(--hd-accent);
+    border-color: var(--hd-surface-strong);
+  }
+  .hd-settings[data-tone='glass'] .hd-range::-moz-range-thumb {
+    background: var(--hd-accent);
+    border-color: var(--hd-surface-strong);
+  }
+  .hd-settings[data-tone='glass'] .hd-settings-pin { color: var(--hd-text-2); }
+  .hd-settings[data-tone='glass'] .hd-settings-pin:hover { background: var(--hd-surface-2); }
+  .hd-settings[data-tone='glass'] .hd-settings-pin.is-on { color: var(--hd-accent); }
+
+  /* ── Tone: paper (sticky widget) ─────────────────────────────────── */
+  .hd-settings[data-tone='paper'] {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .hd-settings[data-tone='paper'] .hd-settings-label { color: rgba(0, 0, 0, 0.5); }
+  .hd-settings[data-tone='paper'] .hd-settings-value { color: rgba(0, 0, 0, 0.7); }
+  .hd-settings[data-tone='paper'] .hd-range { background: rgba(0, 0, 0, 0.15); }
+  .hd-settings[data-tone='paper'] .hd-range::-webkit-slider-thumb {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  .hd-settings[data-tone='paper'] .hd-range::-moz-range-thumb {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  .hd-settings[data-tone='paper'] .hd-settings-pin { color: rgba(0, 0, 0, 0.55); }
+  .hd-settings[data-tone='paper'] .hd-settings-pin:hover { background: rgba(0, 0, 0, 0.08); }
+  .hd-settings[data-tone='paper'] .hd-settings-pin.is-on { color: rgba(0, 0, 0, 0.85); }
+
+  /* ── Slider chrome (shared) ──────────────────────────────────────── */
   .hd-range {
     appearance: none;
     height: 4px;
-    background: var(--hd-border);
     border-radius: 9999px;
   }
   .hd-range::-webkit-slider-thumb {
@@ -82,8 +123,8 @@
     width: 12px;
     height: 12px;
     border-radius: 9999px;
-    background: var(--hd-accent);
-    border: 2px solid var(--hd-surface-1);
+    border-width: 2px;
+    border-style: solid;
     box-shadow: var(--hd-shadow-sm);
     cursor: pointer;
   }
@@ -91,8 +132,8 @@
     width: 12px;
     height: 12px;
     border-radius: 9999px;
-    background: var(--hd-accent);
-    border: 2px solid var(--hd-surface-1);
+    border-width: 2px;
+    border-style: solid;
     cursor: pointer;
   }
 </style>

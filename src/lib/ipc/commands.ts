@@ -85,7 +85,9 @@ export function deleteTask(id: string): Promise<void> {
 // ---- reminders ----------------------------------------------------------
 
 export function setTaskReminder(taskId: string, dueAt: string): Promise<Reminder> {
-  return invoke('set_task_reminder', { taskId, dueAt });
+  // Backend wraps both fields in a single `input` payload so `due_at` can opt
+  // into RFC3339 serde (time's default would expect an array).
+  return invoke('set_task_reminder', { input: { task_id: taskId, due_at: dueAt } });
 }
 
 export function cancelReminder(id: string): Promise<void> {

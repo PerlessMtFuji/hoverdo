@@ -1,29 +1,61 @@
-/* Mica Light - warm white, blue accent.
- * Values sit on top of Windows 11 Mica (which is itself wallpaper-derived),
- * so the alpha channel is deliberately low to let the OS effect show through. */
+/* Light - warm cream "fresh paper" scheme.
+ *
+ * The base is an off-white with subtle peach undertone (#F8F4ED), so Mica
+ * blending plus surface alpha land somewhere between warm-paper and
+ * frosted-glass rather than the clinical cool-grey of the default.
+ *
+ * Surfaces use a tinted-white scrim so legibility holds even when Mica is
+ * off (Linux dev, fallback rendering, screenshots). */
 
 :root,
 :root[data-theme='light'] {
-  --hd-bg: oklch(98.5% 0.005 90); /* ~ #FAFAF9 */
-  --hd-surface-1: color-mix(in oklch, white 70%, transparent);
-  --hd-surface-2: color-mix(in oklch, white 85%, transparent);
+  --hd-bg: #f8f4ed;
+  --hd-bg-app: radial-gradient(
+      120% 70% at 0% 0%,
+      color-mix(in oklch, var(--hd-brand-coral) 18%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 60% at 100% 100%,
+      color-mix(in oklch, var(--hd-brand-violet) 16%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      80% 80% at 50% 100%,
+      color-mix(in oklch, var(--hd-brand-amber) 14%, transparent) 0%,
+      transparent 65%
+    ),
+    #faf6f0;
 
-  --hd-text-1: #0b0d12;
-  --hd-text-2: #454953;
-  --hd-text-3: #8a8f9c;
+  --hd-surface-1: color-mix(in srgb, #ffffff 78%, transparent);
+  --hd-surface-2: color-mix(in srgb, #ffffff 92%, transparent);
+  --hd-surface-strong: #ffffff;
+  --hd-surface-sunken: color-mix(in srgb, #2a1f3a 4%, transparent);
 
-  --hd-accent: #3b6fe0;
+  --hd-text-1: #1a1428;
+  --hd-text-2: #534a66;
+  --hd-text-3: #8c8499;
+  --hd-text-on-brand: #ffffff;
+
+  --hd-accent: #b365ff; /* mid-stop of the brand gradient */
+  --hd-accent-strong: #8c3df5;
   --hd-accent-fg: #ffffff;
+  --hd-accent-soft: color-mix(in srgb, var(--hd-accent) 14%, transparent);
 
-  --hd-border: rgba(0, 0, 0, 0.07);
+  --hd-border: color-mix(in srgb, #2a1f3a 9%, transparent);
+  --hd-border-strong: color-mix(in srgb, #2a1f3a 14%, transparent);
 
-  --hd-shadow-sm: 0 1px 2px rgba(15, 17, 23, 0.06),
-    0 1px 1px rgba(15, 17, 23, 0.04);
-  --hd-shadow-md: 0 6px 16px rgba(15, 17, 23, 0.08),
-    0 2px 4px rgba(15, 17, 23, 0.05);
-  --hd-shadow-lg: 0 16px 40px rgba(15, 17, 23, 0.12),
-    0 4px 12px rgba(15, 17, 23, 0.06);
+  --hd-shadow-xs: 0 1px 1px rgba(42, 31, 58, 0.04);
+  --hd-shadow-sm: 0 1px 2px rgba(42, 31, 58, 0.06),
+    0 1px 1px rgba(42, 31, 58, 0.04);
+  --hd-shadow-md: 0 8px 24px rgba(42, 31, 58, 0.08),
+    0 2px 6px rgba(42, 31, 58, 0.05);
+  --hd-shadow-lg: 0 20px 50px rgba(42, 31, 58, 0.14),
+    0 6px 16px rgba(42, 31, 58, 0.08);
+  --hd-shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hd-accent) 22%, transparent),
+    0 12px 36px color-mix(in srgb, var(--hd-accent) 22%, transparent);
 
   --hd-danger: #d54a3a;
   --hd-success: #2f9e6a;
+  --hd-warning: #cc8a1f;
 }

@@ -1,18 +1,22 @@
-// Main-window navigation state. Tiny on purpose: just which section is
-// active in the sidebar. Persisted to localStorage so the user lands on
-// the same view they last used.
+// Main-window navigation state. Tracks which section is active in the
+// sidebar. Persisted to localStorage so the user lands on the same view
+// they last used.
+//
+// 'home' is the new widget-hub landing surface; 'notes' and 'lists' are
+// the library views.
 
-export type Section = 'notes' | 'lists';
+export type Section = 'home' | 'notes' | 'lists';
 
 const STORAGE_KEY = 'hoverdo:nav:section';
 
 function read(): Section {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
-    return v === 'lists' ? 'lists' : 'notes';
+    if (v === 'notes' || v === 'lists' || v === 'home') return v;
   } catch {
-    return 'notes';
+    // ignore
   }
+  return 'home';
 }
 
 class NavStore {
@@ -23,7 +27,7 @@ class NavStore {
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // ignore - non-fatal
+      // ignore
     }
   }
 }

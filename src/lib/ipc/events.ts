@@ -8,6 +8,7 @@ export type EventMap = {
   'lists:changed': string; // id of the affected list
   'tasks:changed': string; // list_id of the affected task's list
   'reminders:changed': string; // list_id of the affected task's list
+  'widgets:changed': null; // active widget set changed; payload unused
 };
 
 export function on<E extends keyof EventMap>(

@@ -4,6 +4,7 @@
   import { listsStore } from '$lib/stores/lists.svelte';
   import { navStore } from '$lib/stores/nav.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
+  import HomeHub from '$lib/components/HomeHub.svelte';
   import NoteList from '$lib/components/NoteList.svelte';
   import NoteEditor from '$lib/components/NoteEditor.svelte';
   import ListPicker from '$lib/components/ListPicker.svelte';
@@ -18,12 +19,13 @@
     void listsStore.ensureSubscribed();
   });
 
-  // Ctrl/Cmd+N → new item in the active section.
+  // Ctrl/Cmd+N → create in the active library section. From the hub we
+  // default to "new note" since that's the most common scratch action.
   function handleKey(e: KeyboardEvent) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
       e.preventDefault();
-      if (navStore.section === 'notes') void notesStore.create();
-      else void listsStore.create();
+      if (navStore.section === 'lists') void listsStore.create();
+      else void notesStore.create();
     }
   }
 </script>
@@ -31,30 +33,44 @@
 <svelte:window onkeydown={handleKey} />
 
 <div class="flex h-full flex-col">
+  <!-- Top bar. Drag region with the wordmark on the left (gradient!) and the
+       search + theme toggle on the right. Keeping height at 44px so the
+       chrome stays light. -->
   <header
-    class="drag-region flex h-10 shrink-0 items-center gap-3 border-b border-border-subtle px-4 text-text-2"
+    class="drag-region flex h-11 shrink-0 items-center gap-3 border-b border-border-subtle px-4"
   >
-    <span class="text-sm font-medium tracking-tight text-text-1">Hoverdo</span>
+    <span class="flex items-center gap-2">
+      <span
+        aria-hidden="true"
+        class="block h-4 w-4 rounded-pill shadow-hd-sm"
+        style="background: var(--hd-gradient-brand);"
+      ></span>
+      <span class="gradient-text text-sm font-semibold tracking-tight">
+        Hoverdo
+      </span>
+    </span>
     <div class="flex-1"></div>
     <SearchBar />
     <button
       type="button"
-      class="rounded-control p-1 text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1"
+      class="rounded-control p-1.5 text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1"
       aria-label="Toggle theme"
       data-no-drag
       onclick={toggleTheme}
     >
       {#if theme.resolved === 'dark'}
-        <Sun size={16} />
+        <Sun size={15} />
       {:else}
-        <Moon size={16} />
+        <Moon size={15} />
       {/if}
     </button>
   </header>
 
   <main class="flex flex-1 overflow-hidden">
     <Sidebar />
-    {#if navStore.section === 'notes'}
+    {#if navStore.section === 'home'}
+      <HomeHub />
+    {:else if navStore.section === 'notes'}
       <NoteList />
       <NoteEditor />
     {:else}
