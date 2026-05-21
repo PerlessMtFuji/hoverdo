@@ -11,6 +11,7 @@ pub mod error;
 pub mod models;
 pub mod sync;
 mod theme;
+pub mod widgets;
 
 use std::sync::Arc;
 
@@ -58,6 +59,18 @@ pub fn run() {
             tracing::info!(path = ?db_path, device_id = %db.device_id, "database ready");
 
             app.manage(AppState { db: Arc::new(db) });
+
+            // Restore any widgets that were open when the app last quit. We
+            // run this async so setup() doesn't block on window creation.
+            let restore_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                match widgets::restore_active(&restore_handle).await {
+                    Ok(n) if n > 0 => tracing::info!(count = n, "restored widgets"),
+                    Ok(_) => {}
+                    Err(e) => tracing::warn!(error = %e, "widget restore failed"),
+                }
+            });
+
             tracing::info!("Hoverdo started");
             Ok(())
         })
@@ -69,6 +82,11 @@ pub fn run() {
             commands::notes::get_note,
             commands::notes::update_note,
             commands::notes::delete_note,
+            commands::widgets::pin_note,
+            commands::widgets::unpin_widget,
+            commands::widgets::get_widget,
+            commands::widgets::list_widgets,
+            commands::widgets::save_widget_geometry,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

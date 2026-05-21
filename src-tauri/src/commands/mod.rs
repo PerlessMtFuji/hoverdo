@@ -3,3 +3,4 @@
 //! in the repo layer, not here. Commands are registered in `lib.rs`.
 
 pub mod notes;
+pub mod widgets;
