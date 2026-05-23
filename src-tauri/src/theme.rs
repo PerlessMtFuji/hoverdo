@@ -1,8 +1,14 @@
 //! OS-level window effects (Mica/Acrylic on Windows).
 //!
-//! Per the Hoverdo plan, every window renders against a Mica surface on
-//! Windows 11+, with Acrylic as the Windows 10 fallback. Other targets are
-//! supported only for development convenience and get no native effect.
+//! Applied to the main (library) window only: it renders against a Mica
+//! surface on Windows 11+, with Acrylic as the Windows 10 fallback. Other
+//! targets are supported only for development convenience and get no native
+//! effect.
+//!
+//! Widget windows deliberately skip this. They are transparent, borderless
+//! and rounded; a Mica/Acrylic backdrop would paint an opaque square material
+//! behind the rounded card, exposing the corners and turning the opacity
+//! slider into a dimmer instead of real see-through transparency.
 
 #[cfg(target_os = "windows")]
 pub fn apply_window_effects(window: &tauri::WebviewWindow) {

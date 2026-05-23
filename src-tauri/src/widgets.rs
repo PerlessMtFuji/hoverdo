@@ -56,7 +56,13 @@ pub fn spawn_window(app: &AppHandle, instance: &WidgetInstance) -> Result<()> {
         .build()
         .map_err(|e| HoverdoError::internal(format!("spawn widget window: {e}")))?;
 
-    crate::theme::apply_window_effects(&window);
+    // Deliberately NO Mica/Acrylic here. Those materials paint an opaque,
+    // square, tinted backdrop across the whole window rect, which sits behind
+    // the rounded widget card and breaks two things: the rounded-corner gaps
+    // show the square material instead of the desktop, and lowering the card's
+    // CSS opacity just blends it toward that material (a dim tint) instead of
+    // becoming see-through. A plain transparent window lets the rounded corners
+    // and the opacity slider reveal the actual desktop behind the widget.
 
     // When the user closes the widget, soft-delete its instance row so we
     // don't try to resurrect it on next startup. Note we don't preventClose
